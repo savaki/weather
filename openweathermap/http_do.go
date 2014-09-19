@@ -16,12 +16,12 @@ func httpDo(ctx context.Context, req *http.Request, f ResponseHandlerFunc) error
 	go func() { c <- f(client.Do(req)) }()
 	select {
 	case <-ctx.Done():
-		debug("httpDo - CancelRequest")
+		debug("http - CancelRequest")
 		tr.CancelRequest(req)
 		<-c // Wait for f to return.
 		return ctx.Err()
 	case err := <-c:
-		debug("httpDo - ok")
+		debug("http - ok")
 		return err
 	}
 }

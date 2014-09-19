@@ -43,8 +43,8 @@ func (s *WeatherService) FindAll(cities []string) (map[string]*openweathermap.We
 		select {
 		case result := <-responses:
 			if result.err == nil {
-				debug(fmt.Sprintf("allWeather => %d", len(allWeather)))
 				allWeather[result.city] = result.weather
+				debug(fmt.Sprintf("weather reports received => %d", len(allWeather)))
 			}
 		case <-ctx.Done():
 			debug("timeout")
@@ -52,13 +52,16 @@ func (s *WeatherService) FindAll(cities []string) (map[string]*openweathermap.We
 		}
 	}
 
+	debug("finished")
+
 	return allWeather, nil
 }
 
 func (s *WeatherService) find(ctx context.Context, city string, responses chan *getWeatherResponse) {
 	finder := func() *getWeatherResponse {
+		debug(fmt.Sprintf("GetWeather(%s)", city))
 		response, err := s.Client.GetWeather(ctx, city)
-		debug(city)
+		debug(fmt.Sprintf("received weather => %s", city))
 		return &getWeatherResponse{
 			city:    city,
 			weather: response,
