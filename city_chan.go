@@ -23,6 +23,7 @@ func (s *WeatherService) Find(requests <-chan RequestFunc) error {
 	// internal communication channel
 	responses := make(chan response)
 
+	// helper method to execute request and toss response into responses channel
 	handle := func(id int, request RequestFunc) {
 		i := id
 		debug(fmt.Sprintf("request: %d", i))
@@ -34,7 +35,7 @@ func (s *WeatherService) Find(requests <-chan RequestFunc) error {
 			}
 	}
 
-	// invoke a bunch of go-routines to make the call
+	// perform each request with two parallel calls
 	id := 0
 	for request := range requests {
 		id = id + 1
@@ -42,6 +43,7 @@ func (s *WeatherService) Find(requests <-chan RequestFunc) error {
 		go handle(id, request) // request #2
 	}
 
+	// collect the results and return when finished
 	results := map[int]int{}
 	for len(results) < id {
 		select {
